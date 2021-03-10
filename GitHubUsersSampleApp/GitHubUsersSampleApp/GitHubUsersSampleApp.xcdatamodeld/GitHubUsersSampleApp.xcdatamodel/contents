@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="17709" systemVersion="19G2021" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+    <entity name="User" representedClassName="User" syncable="YES" codeGenerationType="class">
+        <attribute name="avatarURL" optional="YES" attributeType="String"/>
+        <attribute name="bio" optional="YES" attributeType="String"/>
+        <attribute name="blog" optional="YES" attributeType="String"/>
+        <attribute name="company" optional="YES" attributeType="String"/>
+        <attribute name="createdAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="email" optional="YES" attributeType="String"/>
+        <attribute name="eventsURL" optional="YES" attributeType="String"/>
+        <attribute name="followers" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="followersURL" optional="YES" attributeType="String"/>
+        <attribute name="following" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="followingURL" optional="YES" attributeType="String"/>
+        <attribute name="gistsURL" optional="YES" attributeType="String"/>
+        <attribute name="gravatarID" optional="YES" attributeType="String"/>
+        <attribute name="hireable" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
+        <attribute name="htmlURL" optional="YES" attributeType="String"/>
+        <attribute name="id" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="location" optional="YES" attributeType="String"/>
+        <attribute name="login" optional="YES" attributeType="String"/>
+        <attribute name="name" optional="YES" attributeType="String"/>
+        <attribute name="nodeID" optional="YES" attributeType="String"/>
+        <attribute name="note" optional="YES" attributeType="String"/>
+        <attribute name="organizationURL" optional="YES" attributeType="String"/>
+        <attribute name="piblicRepos" optional="YES" attributeType="Integer 32" usesScalarValueType="YES"/>
+        <attribute name="publicGists" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="receivedEventsURL" optional="YES" attributeType="String"/>
+        <attribute name="reposURL" optional="YES" attributeType="String"/>
+        <attribute name="siteAdmin" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
+        <attribute name="starredURL" optional="YES" attributeType="String"/>
+        <attribute name="subscriptionURL" optional="YES" attributeType="String"/>
+        <attribute name="twitterUsername" optional="YES" attributeType="String"/>
+        <attribute name="type" optional="YES" attributeType="String"/>
+        <attribute name="updatedAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="url" optional="YES" attributeType="String"/>
+    </entity>
+    <elements>
+        <element name="User" positionX="-63" positionY="-18" width="128" height="538"/>
+    </elements>
+</model>
