@@ -47,6 +47,8 @@ class UserDetailViewController: UIViewController {
 // MARK: - PRIVATE
 extension UserDetailViewController {
     func prepareViewModelObserver() {
+        self.viewModel.userDidChanges = { (_, error) in }
+        self.viewModel.userFetched = { (user) in }
         self.viewModel.dataUpdated = { (success) in
             if success {
                 self.navigationController?.popViewController(animated: true)

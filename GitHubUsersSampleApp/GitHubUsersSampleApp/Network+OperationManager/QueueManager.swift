@@ -9,7 +9,7 @@ import Foundation
 import Network
 
 class QueueManager {
-    let monitor = NWPathMonitor()
+    let monitor = NWPathMonitor() 
     var queueList = [ConcurrentOperation]()
     var isChainOperationStart = false
     
@@ -19,8 +19,8 @@ class QueueManager {
     func monitorQueue() {
         monitor.pathUpdateHandler = { path in
             if path.status == .satisfied {
+                NotificationCenter.default.post(name: Notification.Name("connectionAvailable"), object: nil)
                 if self.queueList.count > 0 {
-                    print(self.queueList.count)
                     if self.isChainOperationStart == false {
                         self.isChainOperationStart = true
                         Global.shared.queue.addChainedOperations(self.queueList) {
@@ -31,9 +31,10 @@ class QueueManager {
                 }
             } else {
                 print("No connection.")
+                NotificationCenter.default.post(name: Notification.Name("noConnection"), object: nil)
             }
         }
-        let queue = DispatchQueue(label: "Monitor")
+        let queue = DispatchQueue.global(qos: .background)
         monitor.start(queue: queue)
     }
 }

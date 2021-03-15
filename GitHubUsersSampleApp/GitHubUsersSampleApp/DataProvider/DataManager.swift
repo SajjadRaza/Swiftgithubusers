@@ -10,9 +10,10 @@ import CoreData
 
 protocol DataManagerProtocol {
     associatedtype T
-    func fetchList(fetchNextRecords: Bool, callback: @escaping (Result<Bool, AppError>) -> Void)
+    func fetchList(fetchNextRecords: Bool, callback: @escaping (Result<[T], AppError>) -> Void)
     func fetchItem(itemName: String, callback: @escaping (Result<T, AppError>) -> Void)
     func updateItem(item: T, attributeName: String, attributeValue: Any) -> Bool
+    func getAllStoredData() -> [T]?
 }
 
 class UserDataManager: NSObject, DataManagerProtocol {
@@ -65,25 +66,14 @@ class UserDataManager: NSObject, DataManagerProtocol {
         }
     }
     
-    func fetchList(fetchNextRecords: Bool = false, callback: @escaping (Result<Bool, AppError>) -> Void) {
+    func fetchList(fetchNextRecords: Bool = false, callback: @escaping (Result<[User], AppError>) -> Void) {
         var params: Parameters = ["since": "0"]
+        
         if fetchNextRecords {
-            let request = NSFetchRequest<NSFetchRequestResult>(entityName: "User")
-            request.fetchLimit = 1
-            
-            let predicate = NSPredicate(format: "id == max(id)")
-            request.predicate = predicate
-            
-            var maxValue: Int32?
-            do {
-                let result = try self.viewContext.fetch(request).first
-                maxValue = (result as! User).id
-            } catch {
-                print("Unresolved error in retrieving max personId value \(error)")
-            }
-            
-            params = maxValue != nil ? ["since": "\(maxValue ?? 0)"] : ["since": "0"]
+            let lastItemID = self.getLastItemID()
+            params = lastItemID != nil ? ["since": "\(lastItemID ?? 0)"] : ["since": "0"]
         }
+        
         UserService.shared.fetchItemList(params: params) { result in
             switch result {
             case .success(let data):
@@ -91,7 +81,20 @@ class UserDataManager: NSObject, DataManagerProtocol {
                 taskContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
                 taskContext.undoManager = nil
                 let dataSynced = self.syncUsersData(with: data, taskContext: taskContext)
-                callback(.success(dataSynced))
+                Global.shared.apiResponsePageSize = data.count
+                //callback(.success(dataSynced))
+                if dataSynced {
+                    let usersRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "User")
+                    usersRequest.sortDescriptors = [NSSortDescriptor(key: "userID", ascending: true)]
+                    do {
+                        let fetchedData = try self.viewContext.fetch(usersRequest)
+                        callback(.success((fetchedData as? [User])!))
+                    } catch {
+                        print("Error: \(error)\nCould not load existing records.")
+                    }
+                }else {
+                    callback(.failure(.canNotProcessData))
+                }
             case .failure(let error):
                 switch error {
                 case .canNotProcessData:
@@ -120,8 +123,9 @@ class UserDataManager: NSObject, DataManagerProtocol {
         return false
     }
     
-    func getUsers() -> [User]? {
+    func getAllStoredData() -> [User]? {
         let usersRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "User")
+        usersRequest.sortDescriptors = [NSSortDescriptor(key: "userID", ascending: true)]
         do {
             let fetchedData = try self.viewContext.fetch(usersRequest)
             return fetchedData as? [User]
@@ -132,6 +136,22 @@ class UserDataManager: NSObject, DataManagerProtocol {
     }
     
     // MARK: - Private Methods
+    fileprivate func getLastItemID() -> Int32? {
+        let request = NSFetchRequest<NSFetchRequestResult>(entityName: "User")
+        request.fetchLimit = 1
+        request.sortDescriptors = [NSSortDescriptor.init(key: "userID", ascending: false)]
+        
+        var maxValue: Int32?
+        do {
+            let result = try self.viewContext.fetch(request).first
+            maxValue = (result as? User)?.userID
+        } catch {
+            print("Unresolved error in retrieving max personId value \(error)")
+        }
+        
+        return maxValue
+    }
+    
     fileprivate func syncUsersData(with userRMs: [UserResponseModel], taskContext: NSManagedObjectContext) -> Bool {
         var successfull = false
         taskContext.performAndWait {
@@ -169,7 +189,7 @@ class UserDataManager: NSObject, DataManagerProtocol {
         let request = NSFetchRequest<NSFetchRequestResult>(entityName: "User")
         request.fetchLimit = 1
         
-        let predicate = NSPredicate(format: "id == %i", userRM.id!)
+        let predicate = NSPredicate(format: "userID == %i", userRM.userID!)
         request.predicate = predicate
         
         do {

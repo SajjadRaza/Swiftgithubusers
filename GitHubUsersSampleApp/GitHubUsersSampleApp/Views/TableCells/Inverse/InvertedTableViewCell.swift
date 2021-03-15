@@ -17,7 +17,11 @@ class InvertedTableViewCell: UITableViewCell, ConfigurableTableViewCellProtocol 
     func configureWithModel(_ userModel: User) {
         self.model = userModel
         self.titleLabel.text = userModel.login ?? ""
-        self.picture.setImage(withImageURL: userModel.avatarURL ?? "", placeholderImage: nil, size: .original)
+        if let avatarURL = userModel.avatarURL{
+            self.picture.setImage(withImageURL: avatarURL, placeholderImage: nil, size: .original)
+        }else{
+            self.picture.image = nil
+        }
     }
     
     override func awakeFromNib() {
@@ -26,7 +30,7 @@ class InvertedTableViewCell: UITableViewCell, ConfigurableTableViewCellProtocol 
         self.picture.contentMode = .scaleToFill
         self.mainPicView.setBorder(color: .white, width: 1, radius: 40)
         self.mainPicView.backgroundColor = .black
-        self.mainPicView.transform = CGAffineTransform.init(rotationAngle: 180)
+        
     }
     
     override func setSelected(_ selected: Bool, animated: Bool) {

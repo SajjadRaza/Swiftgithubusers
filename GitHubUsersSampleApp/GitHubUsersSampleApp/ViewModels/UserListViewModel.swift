@@ -42,8 +42,67 @@ class UserListViewModel: UserListViewModelProtocol {
         }
     }
     
+    // MARK: - UserListViewModelProtocol
+    func fetchUserList(nextBatch: Bool) {
+        if nextBatch {
+            Global.shared.queueManager.queueList = Global.shared.queueManager.queueList.filter({$0.name != "UsersFetch"})
+            Global.shared.queueManager.queueList.append(self.fetchAllUsersTask(isNextBatch: nextBatch))
+            Global.shared.queue.addOperation(self.fetchAllUsersTask(isNextBatch: nextBatch))
+        } else {
+            if let fetchedData = UserDataManager.shared.getAllStoredData() {
+                if fetchedData.count == 0 {
+                    Global.shared.queueManager.queueList = Global.shared.queueManager.queueList.filter({$0.name != "UsersFetch"})
+                    Global.shared.queueManager.queueList.append(self.fetchAllUsersTask(isNextBatch: nextBatch))
+                    Global.shared.queue.addOperation(self.fetchAllUsersTask(isNextBatch: nextBatch))
+                } else {
+                    self.users = fetchedData
+                }
+            } else {
+                Global.shared.queueManager.queueList = Global.shared.queueManager.queueList.filter({$0.name != "UsersFetch"})
+                Global.shared.queueManager.queueList.append(self.fetchAllUsersTask(isNextBatch: nextBatch))
+                Global.shared.queue.addOperation(self.fetchAllUsersTask(isNextBatch: nextBatch))
+            }
+        }
+    }
     
-    private func processUsers() {
+    func getUsers() -> [UserCellViewModelProtocol] {
+        if  self.searchQuery != "" {
+            return self.usersCellVM?.filter({
+                if let loginName = $0.userModel.login, let note = $0.userModel.note, let name = $0.userModel.name {
+                    return (loginName.lowercased().contains(self.searchQuery.lowercased()) || note.contains(self.searchQuery) || name.contains(self.searchQuery))
+                } else {
+                    return false
+                }
+            }) ?? []
+        } else {
+            return self.usersCellVM ?? []
+        }
+    }
+    
+    func fetchUserDetail(userName: String) {
+        Global.shared.queueManager.queueList = Global.shared.queueManager.queueList.filter({$0.name != "UserDetail"})
+        Global.shared.queueManager.queueList.append(self.fetchUserDetailTask(userName: userName))
+        Global.shared.queue.addOperation(self.fetchUserDetailTask(userName: userName))
+    }
+    
+    func updateUserData(user: User, notes: String) {
+        let updated = UserDataManager.shared.updateItem(item: user, attributeName: "note", attributeValue: notes)
+        
+        if updated {
+            self.processUsers()
+        }
+        self.dataUpdated!(updated)
+    }
+    
+    //MARK: - Public
+    func setSearch(text: String) {
+        self.searchQuery = text
+        self.userDidChanges!(true, false)
+        
+    }
+    
+    //MARK: - Private Methods
+    fileprivate func processUsers() {
         if let usersArray = users {
             var tempCellVMs = [UserCellViewModelProtocol]()
             for (index, user) in usersArray.enumerated() {
@@ -62,37 +121,13 @@ class UserListViewModel: UserListViewModelProtocol {
         }
     }
     
-    func fetchUserList(nextBatch: Bool) {
-        if nextBatch {
-            Global.shared.queueManager.queueList = Global.shared.queueManager.queueList.filter({$0.name != "UsersFetch"})
-            Global.shared.queueManager.queueList.append(self.fetchAllUsersTask(isNextBatch: nextBatch))
-            Global.shared.queue.addOperation(self.fetchAllUsersTask(isNextBatch: nextBatch))
-        } else {
-            if let fetchedData = UserDataManager.shared.getUsers() {
-                if fetchedData.count == 0 {
-                    Global.shared.queueManager.queueList = Global.shared.queueManager.queueList.filter({$0.name != "UsersFetch"})
-                    Global.shared.queueManager.queueList.append(self.fetchAllUsersTask())
-                    Global.shared.queue.addOperation(self.fetchAllUsersTask())
-                } else {
-                    self.users = fetchedData
-                }
-            } else {
-                Global.shared.queueManager.queueList = Global.shared.queueManager.queueList.filter({$0.name != "UsersFetch"})
-                Global.shared.queueManager.queueList.append(self.fetchAllUsersTask())
-                Global.shared.queue.addOperation(self.fetchAllUsersTask())
-            }
-        }
-    }
-    
-    func fetchAllUsersTask(isNextBatch: Bool = false) -> ConcurrentOperation {
+    fileprivate func fetchAllUsersTask(isNextBatch: Bool = false) -> ConcurrentOperation {
         let concurrentOperationA = ConcurrentOperation { _ in
             UserDataManager.shared.fetchList(fetchNextRecords: isNextBatch) { (result) in
                 switch result {
-                case .success(let fetchNStoreDone):
-                    if fetchNStoreDone {
-                        self.users = UserDataManager.shared.getUsers()
-                        Global.shared.queueManager.queueList = Global.shared.queueManager.queueList.filter({$0.name != "UsersFetch"})
-                    }
+                case .success(let users):
+                    self.users = users
+                    Global.shared.queueManager.queueList = Global.shared.queueManager.queueList.filter({$0.name != "UsersFetch"})
                 case.failure(let error):
                     print(error.localizedDescription)
                 }
@@ -102,27 +137,7 @@ class UserListViewModel: UserListViewModelProtocol {
         return concurrentOperationA
     }
     
-    func getUsers() -> [UserCellViewModelProtocol] {
-        
-        if  self.searchQuery != "" {
-            return self.usersCellVM?.filter({
-                if let loginName = $0.userModel.login {
-                    return loginName.lowercased().contains(self.searchQuery.lowercased())
-                } else {
-                    return false
-                }
-            }) ?? []
-        } else {
-            return self.usersCellVM ?? []
-        }
-    }
-    
-    func fetchUserDetail(userName: String) {
-        Global.shared.queueManager.queueList = Global.shared.queueManager.queueList.filter({$0.name != "UserDetail"})
-        Global.shared.queueManager.queueList.append(self.fetchUserDetailTask(userName: userName))
-        Global.shared.queue.addOperation(self.fetchUserDetailTask(userName: userName))
-    }
-    func fetchUserDetailTask(userName: String) -> ConcurrentOperation {
+    fileprivate func fetchUserDetailTask(userName: String) -> ConcurrentOperation {
         let concurrentOperationA = ConcurrentOperation { _ in
             UserDataManager.shared.fetchItem(itemName: userName) { (result) in
                 switch result {
@@ -136,20 +151,5 @@ class UserListViewModel: UserListViewModelProtocol {
         }
         concurrentOperationA.name = "UserDetail"
         return concurrentOperationA
-    }
-    
-    func updateUserData(user: User, notes: String) {
-        let updated = UserDataManager.shared.updateItem(item: user, attributeName: "note", attributeValue: notes)
-        
-        if updated {
-            self.processUsers()
-        }
-        self.dataUpdated!(updated)
-    }
-    
-    func setSearch(text: String) {
-        self.searchQuery = text
-        self.userDidChanges!(true, false)
-        
     }
 }

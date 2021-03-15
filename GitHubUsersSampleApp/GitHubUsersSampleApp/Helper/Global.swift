@@ -17,6 +17,8 @@ class Global {
     let queueManager = QueueManager()
     let queue = Queuer(name: "GitHubQueue", maxConcurrentOperationCount: Int.max, qualityOfService: .default)
     
+    var apiResponsePageSize: Int = 0
+    
     #if DEBUG
     let environment: EnvironmentProtocol = AppURL.development
     #else

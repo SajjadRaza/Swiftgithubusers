@@ -22,24 +22,23 @@ class DataManagerTests: XCTestCase {
         userDataManager = nil
     }
     
-    func test_init_userDataManager(){
-        
+    func testInitUserDataManager(){
         let instance = UserDataManager.shared
         XCTAssertNotNil( instance )
     }
     
-    func test_userDataStackInitialization() {
+    func testUserDataStackInitialization() {
       let coreDataStack = userDataManager.persistanceContainer
       XCTAssertNotNil( coreDataStack )
     }
     
-    func test_fetch_all_users() {
+    func testFetchAllUsers() {
         let expect = expectation(description: "Fetch first batch")
         
         userDataManager.fetchList { (result) in
             switch result {
-            case .success(let isFetchedNStore):
-                XCTAssertTrue(isFetchedNStore)
+            case .success(let data):
+                XCTAssertNotNil( data )
             case .failure(let err):
                 XCTAssert(true, err.localizedDescription)
             }
@@ -53,12 +52,12 @@ class DataManagerTests: XCTestCase {
         }
     }
     
-    func test_fetch_all_users_nextBatch() {
+    func testFetchAllUsersNextBatch() {
         let expect = expectation(description: "Fetch next batch")
         userDataManager.fetchList(fetchNextRecords: true) { (result) in
             switch result {
-            case .success(let isFetchedNStore):
-                XCTAssertTrue(isFetchedNStore)
+            case .success(let data):
+                XCTAssertNotNil( data )
             case .failure(let err):
                 XCTAssert(true, err.localizedDescription)
             }
@@ -72,9 +71,9 @@ class DataManagerTests: XCTestCase {
         }
     }
     
-    func test_fetch_user() {
+    func testFetchUser() {
         let expect = expectation(description: "Fetch user")
-        userDataManager.fetchItem(itemName: "topfunky") { (result) in
+        userDataManager.fetchItem(itemName: "mojombo") { (result) in
             switch result {
             case .success(let user):
                 XCTAssertNotNil( user )
@@ -90,9 +89,9 @@ class DataManagerTests: XCTestCase {
         }
     }
     
-    func test_update_user_note() {
+    func testUpdateUserNote() {
         let expect = expectation(description: "Update note")
-        userDataManager.fetchItem(itemName: "topfunky") { (result) in
+        userDataManager.fetchItem(itemName: "mojombo") { (result) in
             switch result {
             case .success(let user):
                 let recordeUpdated = self.userDataManager.updateItem(item: user, attributeName: "note", attributeValue: "Hello this is XCTest note message.")
@@ -107,5 +106,10 @@ class DataManagerTests: XCTestCase {
                 XCTFail("waitForExpectationsWithTimeout errored: \(error)")
             }
         }
+    }
+    
+    func testGetAllStoredData() {
+        let data = userDataManager.getAllStoredData()
+        XCTAssertNotNil( data )
     }
 }

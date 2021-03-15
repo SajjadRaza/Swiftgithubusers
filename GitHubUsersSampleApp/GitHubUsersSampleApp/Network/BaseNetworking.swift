@@ -99,7 +99,6 @@ extension Requestable {
                     print("Requestable - request error - \(error.localizedDescription)")
                     callback(.failure(.noDataAvailable))
                 } else if let httpResponse = response as? HTTPURLResponse {
-                    print("Requestable - request response- \(httpResponse.statusCode)")
                     if httpResponse.statusCode == 200 {
                         callback(.success(data!))
                     } else {

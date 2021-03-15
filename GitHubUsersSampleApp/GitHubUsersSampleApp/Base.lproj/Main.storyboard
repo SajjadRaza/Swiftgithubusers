@@ -78,12 +78,21 @@
                                         <nil key="textColor"/>
                                         <nil key="highlightedColor"/>
                                     </label>
+                                    <imageView hidden="YES" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="no-internet" translatesAutoresizingMaskIntoConstraints="NO" id="Ou6-8F-7ye">
+                                        <rect key="frame" x="376" y="15" width="30" height="30"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="30" id="eSN-vR-115"/>
+                                            <constraint firstAttribute="width" constant="30" id="hth-uH-S3a"/>
+                                        </constraints>
+                                    </imageView>
                                 </subviews>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                 <constraints>
                                     <constraint firstItem="QVI-my-xLn" firstAttribute="centerX" secondItem="JEH-xq-e0v" secondAttribute="centerX" id="3cl-x5-ADc"/>
                                     <constraint firstAttribute="height" constant="60" id="Aw1-xU-VEQ"/>
                                     <constraint firstItem="QVI-my-xLn" firstAttribute="centerY" secondItem="JEH-xq-e0v" secondAttribute="centerY" id="CuE-lT-NHf"/>
+                                    <constraint firstAttribute="trailing" secondItem="Ou6-8F-7ye" secondAttribute="trailing" constant="8" id="lAb-Bq-wEn"/>
+                                    <constraint firstItem="Ou6-8F-7ye" firstAttribute="centerY" secondItem="JEH-xq-e0v" secondAttribute="centerY" id="sPg-WY-h5u"/>
                                 </constraints>
                             </view>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" showsHorizontalScrollIndicator="NO" showsVerticalScrollIndicator="NO" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="EG6-kp-qCg">
@@ -108,6 +117,7 @@
                     </view>
                     <navigationItem key="navigationItem" id="WNp-7I-ly6"/>
                     <connections>
+                        <outlet property="noInternetIndicator" destination="Ou6-8F-7ye" id="rHr-xP-pZD"/>
                         <outlet property="searchTextField" destination="AVX-DX-B3s" id="uDX-jq-3b3"/>
                         <outlet property="tableView" destination="EG6-kp-qCg" id="5T7-qX-DES"/>
                     </connections>
@@ -342,6 +352,7 @@
     </designables>
     <resources>
         <image name="back" width="17" height="17"/>
+        <image name="no-internet" width="75" height="75"/>
         <image name="search" width="48" height="48"/>
         <systemColor name="labelColor">
             <color white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>

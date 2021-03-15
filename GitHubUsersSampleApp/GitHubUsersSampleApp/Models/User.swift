@@ -13,7 +13,7 @@ extension User {
     
     func update(with userRM: UserResponseModel) throws {
         login = userRM.login
-        id = userRM.id ?? 0
+        userID = userRM.userID ?? 0
         nodeID = userRM.nodeID
         avatarURL = userRM.avatarURL
         gravatarID = userRM.gravatarID

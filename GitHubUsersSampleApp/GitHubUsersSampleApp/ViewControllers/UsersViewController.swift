@@ -13,6 +13,7 @@ class UsersViewController: UIViewController {
     
     @IBOutlet weak var searchTextField: BaseTextFeilds!
     @IBOutlet weak var tableView: UITableView!
+    @IBOutlet weak var noInternetIndicator: UIImageView!
     
     var dataSource: UserDataSource!
     
@@ -26,17 +27,36 @@ class UsersViewController: UIViewController {
         // Do any additional setup after loading the view.
         self.prepareUI()
         self.fetchUserList()
+        self.prepareInternetObservers()
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        
+        self.tableView.reloadData()
+        self.prepareViewModelObserver()
+    }
+    
+    @objc func internetAvailable() {
+        DispatchQueue.main.async {
+            self.noInternetIndicator.isHidden = true
+        }
+    }
+    
+    @objc func internetNotAvailable() {
+        DispatchQueue.main.async {
+            self.noInternetIndicator.isHidden = false
+        }
     }
 }
 
 // MARK: Prepare UI
 
 extension UsersViewController {
+    
+    func prepareInternetObservers() {
+        NotificationCenter.default.addObserver(self, selector: #selector(internetNotAvailable), name: Notification.Name("noConnection"), object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(internetAvailable), name: Notification.Name("connectionAvailable"), object: nil)
+    }
     
     func prepareUI() {
         self.prepareTableView()
@@ -66,9 +86,7 @@ extension UsersViewController {
     
     func fetchUserList() {
         self.view.activityStartAnimating(activityColor: .black, backgroundColor: UIColor.white.withAlphaComponent(0.5))
-        DispatchQueue.global(qos: .background).async {
-            self.viewModel.fetchUserList(nextBatch: false)
-        }
+        self.viewModel.fetchUserList(nextBatch: false)
     }
     
     func prepareViewModelObserver() {
@@ -83,6 +101,7 @@ extension UsersViewController {
         
         self.viewModel.userFetched = {(user) in
             DispatchQueue.main.async {
+                self.view.activityStopAnimating()
                 if let vc = self.storyboard?.instantiateViewController(identifier: "UserDetailViewController") as? UserDetailViewController {
                     vc.userDetail = user
                     vc.viewModel = self.viewModel
@@ -93,6 +112,8 @@ extension UsersViewController {
                 }
             }
         }
+        
+        self.viewModel.dataUpdated = {(success) in }
     }
     
     func reloadTableView() {
@@ -104,9 +125,7 @@ extension UsersViewController: UserDataSourceProtocol {
     
     func userSelect(user: User) {
         self.view.activityStartAnimating(activityColor: .black, backgroundColor: UIColor.white.withAlphaComponent(0.5))
-        DispatchQueue.global(qos: .background).async {
-            self.viewModel.fetchUserDetail(userName: user.login!)
-        }
+        self.viewModel.fetchUserDetail(userName: user.login!)
     }
     
 }

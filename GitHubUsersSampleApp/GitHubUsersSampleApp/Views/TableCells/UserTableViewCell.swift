@@ -19,8 +19,11 @@ class UserTableViewCell: UITableViewCell, ConfigurableTableViewCellProtocol {
     func configureWithModel(_ userModel: User) {
         self.model = userModel
         self.titleLabel.text = userModel.login ?? ""
-        self.picture.setImage(withImageURL: userModel.avatarURL ?? "", placeholderImage: nil, size: .original)
-        
+        if let avatarURL = userModel.avatarURL{
+            self.picture.setImage(withImageURL: avatarURL, placeholderImage: nil, size: .original)
+        }else{
+            self.picture.image = nil
+        }
     }
     
     override func awakeFromNib() {

@@ -10,7 +10,7 @@ import Foundation
 struct UserResponseModel: Codable {
     
     let login: String?
-    let id: Int32?
+    let userID: Int32?
     let nodeID: String?
     let avatarURL: String?
     let gravatarID: String?
@@ -45,7 +45,7 @@ struct UserResponseModel: Codable {
     enum CodingKeys: String, CodingKey {
         
         case login = "login"
-        case id = "id"
+        case userID = "id"
         case nodeID = "node_id"
         case avatarURL = "avatar_url"
         case gravatarID = "gravatar_id"
@@ -82,7 +82,7 @@ struct UserResponseModel: Codable {
     init(from decoder: Decoder) throws {
         let values = try decoder.container(keyedBy: CodingKeys.self)
         login = try values.decodeIfPresent(String.self, forKey: .login)
-        id = try values.decodeIfPresent(Int32.self, forKey: .id)
+        userID = try values.decodeIfPresent(Int32.self, forKey: .userID)
         nodeID = try values.decodeIfPresent(String.self, forKey: .nodeID)
         avatarURL = try values.decodeIfPresent(String.self, forKey: .avatarURL)
         gravatarID = try values.decodeIfPresent(String.self, forKey: .gravatarID)
